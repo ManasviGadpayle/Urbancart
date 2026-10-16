@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parent
-REGRESSION_MODEL_PATH = ROOT / "urbankart_best_regression_model.joblib"
+REGRESSION_MODEL_PATH = ROOT / "urbankart_best_model.pkl"
 REVIEWS_DATASET_PATH = ROOT / "UrbanKart_HuggingFace_NLP_Customer_Reviews.csv"
 SENTIMENT_MODEL_ID = "cardiffnlp/twitter-roberta-base-sentiment-latest"
 MAX_TEXT_LENGTH = 512
