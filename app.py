@@ -94,3 +94,46 @@ def revenue_prediction_page() -> None:
         st.error("Could not load the revenue prediction model.")
         st.exception(exc)
         return
+
+def customer_feedback_page() -> None:
+    render_header("Customer Feedback · Sentiment and Examples")
+    st.subheader("Customer Feedback Analysis")
+    st.write("Upload or use the sample dataset to inspect reviews and run sentiment analysis.")
+
+    if REVIEWS_DATASET_PATH.exists():
+        try:
+            df = load_reviews_dataset(str(REVIEWS_DATASET_PATH), REVIEWS_DATASET_PATH.stat().st_mtime)
+            st.markdown("**Dataset preview:**")
+            st.dataframe(df.head(10))
+        except Exception as exc:
+            st.error("Could not load the reviews dataset.")
+            st.exception(exc)
+            return
+    else:
+        st.info(f"Place {REVIEWS_DATASET_PATH.name} in the project root beside app.py or upload a file.")
+
+    # Run sentiment pipeline on demand (loads model lazily)
+    if st.button("Run sentiment on first 10 reviews"):
+        if not REVIEWS_DATASET_PATH.exists():
+            st.error("No reviews dataset available to analyze.")
+        else:
+            with st.spinner("Loading sentiment model and running analysis..."):
+                try:
+                    pipe = load_sentiment_pipeline(SENTIMENT_MODEL_ID)
+                    texts = df.iloc[:10]["review_text"].astype(str).tolist() if "review_text" in df.columns else df.iloc[:10].astype(str).values.flatten().tolist()
+                    results = pipe(texts)
+                    st.write(results)
+                except Exception as exc:
+                    st.error("Sentiment pipeline failed.")
+                    st.exception(exc)
+
+def main() -> None:
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Select page", ["Revenue Prediction", "Customer Feedback"])
+    if page == "Revenue Prediction":
+        revenue_prediction_page()
+    else:
+        customer_feedback_page()
+
+if __name__ == "__main__":
+    main()
